@@ -93,7 +93,7 @@ def start_crawler(twitter):
         set_value(db, "user:" + user, info)
 
         TODO_USER_LIST.extend(get_user_followers(twitter, user))
-        time.sleep(3)
+        time.sleep(30)
 
 
 def main(args=sys.argv[1:]):
