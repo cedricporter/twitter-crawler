@@ -7,9 +7,9 @@ import subprocess
 import os
 import sys
 
-from twitter import follow, Twitter, OAuth, oauth_dance
+from twitter import Twitter, OAuth, oauth_dance
 from twitter.follow import CONSUMER_KEY, CONSUMER_SECRET
-from twitter.follow import lookup
+from twitter.follow import lookup, follow
 from twitter import read_token_file
 
 
