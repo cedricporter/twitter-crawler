@@ -19,7 +19,6 @@ import redis
 
 
 db = redis.StrictRedis(db=3)
-TODO_USER_LIST = deque()
 
 
 def set_value(redis, key, value):
@@ -79,21 +78,26 @@ def get_user_info(user_id):
     return True, info
 
 
-def start_crawler(twitter):
-    while TODO_USER_LIST:
-        set_value(db, "TODO_USER_LIST", TODO_USER_LIST)
-
-        user = TODO_USER_LIST.popleft()
+def start_crawler(twitter, todo_user_list):
+    while todo_user_list:
+        user = todo_user_list.popleft()
         issuc, info = get_user_info(user)
         if not issuc:
-            TODO_USER_LIST.append(user)
+            todo_user_list.append(user)
 
         print "[info] info: %s" % info
         print "[Handle] user: %s" % user
-        set_value(db, "user:" + user, info)
 
-        TODO_USER_LIST.extend(get_user_followers(twitter, user))
-        time.sleep(30)
+        if get_value(db, "user:" + user):
+            print "[pass] user %s" % user
+            continue
+
+        todo_user_list.extend(get_user_followers(twitter, user))
+
+        set_value(db, "user:" + user, info)
+        set_value(db, "TODO_USER_LIST", todo_user_list)
+
+        time.sleep(60)
 
 
 def main(args=sys.argv[1:]):
@@ -110,8 +114,11 @@ def main(args=sys.argv[1:]):
 
     # rate_limit_status(twitter)
 
-    TODO_USER_LIST.append("Stupid_ET")
-    start_crawler(twitter)
+    todo_user_list = get_value(db, "TODO_USER_LIST")
+    if not todo_user_list:
+        todo_user_list = deque(("Stupid_ET", ))
+    print "[todo_user_list] %s" % todo_user_list
+    start_crawler(twitter, todo_user_list)
 
 
 if __name__ == '__main__':
